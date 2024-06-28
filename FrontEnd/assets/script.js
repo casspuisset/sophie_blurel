@@ -48,11 +48,17 @@ function createFilters(categories) {
         buttonFilter.className = "filterButton";
         divFilter.appendChild(buttonFilter);
     }
+    galleryFilter()
 }
 
 //fonction de définition du filtre
 function galleryFilter() {
-    const buttonFilter = document.querySelector(".filterButton");
+    const buttonFilter = document.querySelector(".filterButton"); //querselectorAll (retourne un tableau) ou (plus propre) sur le continer parent event listener
+    console.log(buttonFilter);
+    const test = document.querySelector('.filters');
+    test.addEventListener("click", (t) => {
+        console.log(t)
+    });
     buttonFilter.addEventListener("click", (button) => {
         const newArray = Array.from(works);
         let currentlyActive = button.innerText;
@@ -70,8 +76,8 @@ function galleryFilter() {
         createWorks(piecesOrdonnees);
     });
 }
+////note : aller chercher les travaux par leur id
 
-galleryFilter();
 
 //fonction d'affichage des travaux
 function createWorks(works) {
