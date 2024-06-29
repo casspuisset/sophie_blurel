@@ -1,6 +1,6 @@
 
 //fonction de fetch des articles et d'affichage du portfolio
-async function fetchWorks() {
+async function initGallery() {
     //fetch des travaux dans le backend
     const worksResponse = await fetch('http://localhost:5678/api/works');
     let works = await worksResponse.json();
@@ -12,10 +12,14 @@ async function fetchWorks() {
     createWorks(works);
 }
 //appel de la fonction dans le DOM
-fetchWorks();
+initGallery();
 
-
-
+/*
+//fonction de fetch dans le back
+async function fetchWorks() {
+    const worksResponse = await fetch('http://localhost:5678/api/works');
+    let works = await worksResponse.json();
+}*/
 
 //fonction de fetch des catégories de filtres
 async function fetchFilter() {
@@ -52,28 +56,31 @@ function createFilters(categories) {
 }
 
 //fonction de définition du filtre
-function galleryFilter() {
-    const buttonFilter = document.querySelector(".filterButton"); //querselectorAll (retourne un tableau) ou (plus propre) sur le continer parent event listener
-    console.log(buttonFilter);
-    const test = document.querySelector('.filters');
-    test.addEventListener("click", (t) => {
-        console.log(t)
-    });
-    buttonFilter.addEventListener("click", (button) => {
-        const newArray = Array.from(works);
-        let currentlyActive = button.innerText;
-        if(currentlyActive === "Tous") {
+async function galleryFilter() {
+
+    const clickFilterEvent = document.querySelector('.filters');
+    clickFilterEvent.addEventListener("click", async (t) => {
+        //console.log(t);
+        let currentlyActive = t.target.innerText;
+        console.log(currentlyActive);
+
+        const worksResponse = await fetch('http://localhost:5678/api/works');
+        let works = await worksResponse.json();
+
+
+        //let works = fetchWorks();
+        let newArray = Array.from(works);
+        if (currentlyActive === "Tous") {
             piecesOrdonnees = newArray
         }
         else {
-            piecesOrdonnees = works.filter(function (work) {
-                return work.innerText === currentlyActive
-            })
+            piecesOrdonnees = newArray.filter((work) => work.category.name === currentlyActive)
         }
 
         // Effacement et recréation de la gallerie
         document.querySelector(".gallery").innerHTML = "";
         createWorks(piecesOrdonnees);
+
     });
 }
 ////note : aller chercher les travaux par leur id
@@ -83,6 +90,8 @@ function galleryFilter() {
 function createWorks(works) {
     for (let i = 0; i < works.length; i++) {
         let article = works[i];
+        //verification des informations de chaque article pour les futurs filtres :
+        //console.log("id and name : " + article.category.id + ' ' + article.category.name);
 
         //création des balises
         let newFigure = document.createElement("figure")
