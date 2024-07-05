@@ -13,13 +13,15 @@
 
 
 <body>
+<!-- Bandeau noir édition -->
 <header>
 	<h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
 	<nav>
 		<ul>
-			<li>projets</li>
-			<li>contact</li>
-			<li>login</li>
+			<li><a href="index.html">projets</a></li>
+			<li><a href="#">contact</a></li>
+			<li><a href="login.html" class="login">login</a></li>
+			<li><a href="#" class="logout">logout</a></li>
 			<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
 		</ul>
 	</nav>
@@ -38,6 +40,17 @@
 	</section>
 	<section id="portfolio">
 		<h2>Mes Projets</h2>
+<!--modale de modification-->
+		<dialog>
+			<h2>Gallerie photo</h2>
+			<button autofocus>Fermer</button><!--note : <i class="fa-solid fa-xmark"></i>-->
+			<div><!-- Apercu images gallerie --></div>
+			<button>Ajouter une photo</button>
+		</dialog>
+
+		<button>Modifier</button>
+<!--fin de la modale de modification-->
+
 		<ul class="filters">
 			<!--Boutons de filtre-->
 		</ul>
@@ -69,6 +82,7 @@
 	</nav>
 </footer>
 <script src="./assets/script.js"></script>
+<script src="./assets/modale.js"></script>
 </body>
 
 </html>

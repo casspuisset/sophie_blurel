@@ -14,13 +14,6 @@ async function initGallery() {
 //appel de la fonction dans le DOM
 initGallery();
 
-/*
-//fonction de fetch dans le back
-async function fetchWorks() {
-    const worksResponse = await fetch('http://localhost:5678/api/works');
-    let works = await worksResponse.json();
-}*/
-
 //fonction de fetch des catégories de filtres
 async function fetchFilter() {
     //fetch les catégories dans le backend
@@ -37,7 +30,7 @@ function createFilters(categories) {
     const divFilter = document.querySelector(".filters");
 
     //crée l'élément de bouton
-    const buttonFilter = document.createElement("li");
+    const buttonFilter = document.createElement("button");
     //donne les caractéristiques du bouton "TOUS"
     buttonFilter.innerText = "Tous";
     buttonFilter.className = "filterButton";
@@ -47,7 +40,7 @@ function createFilters(categories) {
     //boucle de création des autres boutons
     for (let i = 0; i < categories.length; i++) {
         let categorie = categories[i];
-        const buttonFilter = document.createElement("li");
+        const buttonFilter = document.createElement("button");
         buttonFilter.innerText = categorie.name;
         buttonFilter.className = "filterButton";
         divFilter.appendChild(buttonFilter);
@@ -67,8 +60,6 @@ async function galleryFilter() {
         const worksResponse = await fetch('http://localhost:5678/api/works');
         let works = await worksResponse.json();
 
-
-        //let works = fetchWorks();
         let newArray = Array.from(works);
         if (currentlyActive === "Tous") {
             piecesOrdonnees = newArray
@@ -83,8 +74,6 @@ async function galleryFilter() {
 
     });
 }
-////note : aller chercher les travaux par leur id
-
 
 //fonction d'affichage des travaux
 function createWorks(works) {
