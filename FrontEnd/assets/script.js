@@ -5,14 +5,43 @@ async function initGallery() {
     const worksResponse = await fetch('http://localhost:5678/api/works');
     let works = await worksResponse.json();
 
+    //initialisation du bouton de login de nav
+    loginLink();
+
     //création des filtres
     fetchFilter();
 
     //affichage des travaux
     createWorks(works);
+    if (sessionStorage.getItem("token")?.length !== 143) {
+        document.querySelector(".edit_modale").style.display = "none";
+        document.getElementById("edition_mode").style.display = "none";
+    } else {
+        document.querySelector(".edit_modale").style.display = "flex";
+        document.querySelector(".filters").style.display = "none";
+        document.getElementById("edition_mode").style.display = "flex";
+
+    }
 }
-//appel de la fonction dans le DOM
+//initialisation de la page index
 initGallery();
+
+//initialisation du lien vers la page de log
+function loginLink() {
+    const loginLink = document.getElementById("login_link");
+
+    if (sessionStorage.getItem("token")) {
+        console.log("token bien enregistré")
+        loginLink.innerText = "logout";
+        loginLink.className = "logout";
+        loginLink.setAttribute("href", "#")
+        disconnect();
+    } else {
+        loginLink.innerText = "login";
+        loginLink.className = "login";
+        loginLink.setAttribute("href", "login.html")
+    }
+}
 
 //fonction de fetch des catégories de filtres
 async function fetchFilter() {
@@ -100,3 +129,70 @@ function createWorks(works) {
         divGallery.appendChild(newFigure);
     }
 }
+
+
+
+
+/*
+*
+Identification token et modale de modification
+*
+*/
+
+/* modale */
+const dialog = document.querySelector("dialog");
+const showButton = document.querySelector("dialog + button");
+const closeButton = document.querySelector("dialog button");
+
+
+showButton.addEventListener("click", () => {
+    dialog.showModal();
+    showModaleGallery();
+});
+
+closeButton.addEventListener("click", () => {
+    dialog.close();
+});
+
+//fonction pour afficher les images dans la modale
+async function showModaleGallery() {
+    const worksResponse = await fetch('http://localhost:5678/api/works');
+    let works = await worksResponse.json();
+
+    for (let i = 0; i < works.length; i++) {
+        let article = works[i];
+
+        //création des balises
+        let newFigure = document.createElement("figure")
+        let imageWork = document.createElement("img");
+        let nameWork = document.createElement("figcaption");
+
+        //attribution des caractéristiques de chaque article
+        imageWork.src = article.imageUrl;
+        nameWork.innerText = article.title;
+
+        //rattachement des balises entre elles
+        newFigure.appendChild(imageWork);
+        newFigure.appendChild(nameWork);
+
+        //rattachement des balises au DOM
+        let divModaleGallery = document.querySelector(".modale_gallery");
+        divModaleGallery.appendChild(newFigure);
+    }}
+
+
+/* fin modale */
+
+//ca fonctionne pas la déconnexion en l'état...
+
+
+function disconnect() {
+    let disconnectButton = document.querySelector(".logout");
+    disconnectButton.addEventListener("click", () => {
+        sessionStorage.removeItem("token");
+        console.log("done")
+        location.reload()
+    })
+    }
+
+disconnect();

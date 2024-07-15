@@ -13,15 +13,17 @@
 
 
 <body>
-<!-- Bandeau noir édition -->
+<div id="edition_mode">
+	<a>icone édition</a>
+	<p>Mode édition</p>
+</div>
 <header>
 	<h1>Sophie Bluel <span>Architecte d'intérieur</span></h1>
 	<nav>
 		<ul>
 			<li><a href="index.html">projets</a></li>
 			<li><a href="#">contact</a></li>
-			<li><a href="login.html" class="login">login</a></li>
-			<li><a href="#" class="logout">logout</a></li>
+			<li><a href="login.html" class="login" id="login_link"></a></li>
 			<li><img src="./assets/icons/instagram.png" alt="Instagram"></li>
 		</ul>
 	</nav>
@@ -39,17 +41,22 @@
 		</article>
 	</section>
 	<section id="portfolio">
-		<h2>Mes Projets</h2>
-<!--modale de modification-->
-		<dialog>
-			<h2>Gallerie photo</h2>
-			<button autofocus>Fermer</button><!--note : <i class="fa-solid fa-xmark"></i>-->
-			<div><!-- Apercu images gallerie --></div>
-			<button>Ajouter une photo</button>
-		</dialog>
-
-		<button>Modifier</button>
-<!--fin de la modale de modification-->
+		<div class="portfolio_nav">
+			<h2>Mes Projets</h2>
+	<!--modale de modification-->
+			<dialog>
+				<div class="modale_nav">
+					<a>Previously</a>
+					<h2>Gallerie photo</h2>
+					<button autofocus>Fermer</button>				
+				</div>
+	<!--note : <i class="fa-solid fa-xmark"></i>-->
+				<div class="modale_gallery"><!-- Apercu images gallerie --></div>
+				<button class="add_photo">Ajouter une photo</button>
+			</dialog>
+			<button class="edit_modale">Modifier</button>
+	<!--fin de la modale de modification-->
+		</div>
 
 		<ul class="filters">
 			<!--Boutons de filtre-->
@@ -82,7 +89,6 @@
 	</nav>
 </footer>
 <script src="./assets/script.js"></script>
-<script src="./assets/modale.js"></script>
 </body>
 
 </html>
