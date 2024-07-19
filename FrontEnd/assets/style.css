@@ -63,12 +63,16 @@ body {
 
 #edition_mode {
 	background-color: black;
-	color: white;
 	padding: 5px;
 	display: flex;
-	align-items: center;
+	justify-content: center;
+	gap: 10px;
 }
 
+#edition_mode p {
+	background-color: black;
+	color: white;
+}
 header {
 	display: flex;
 	justify-content: space-between;
@@ -255,15 +259,43 @@ dialog {
 	display: flex;
 	flex-direction: row;
 	flex-wrap: wrap;
+	gap: 10px;
 }
 
 .modale_gallery figure {
-	flex: 1;
+	width: 100px;
 }
 
 .modale_gallery img {
-	width: 30%;
+	width: 100%;
 }
+
+#previously {
+	visibility: hidden;
+}
+
+#add_form {
+	display: none;
+	flex-direction: column;
+	gap: 10px;
+	padding: 20px;
+}
+
+.add_photo {
+	background-color: #E8F1F6;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 20px 0;
+	width: 100%;
+}
+
+.add_photo p {
+	background-color: #E8F1F6;
+}
+
+
 /* Login page */
 
 .login {

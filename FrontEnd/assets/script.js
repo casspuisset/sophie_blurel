@@ -133,26 +133,66 @@ function createWorks(works) {
 
 
 
-/*
-*
-Identification token et modale de modification
-*
+/**
+ * Modale
 */
 
-/* modale */
-const dialog = document.querySelector("dialog");
-const showButton = document.querySelector("dialog + button");
-const closeButton = document.querySelector("dialog button");
+const dialog = document.querySelector("dialog"); //fenetre modale
+const showButton = document.querySelector("dialog + button"); //bouton d'ouverture de la modale
+const addButton = document.getElementById("add_photo_window"); //bouton pour changer la fenêtre de la modale
+const previouslyButton = document.getElementById("previously"); //bouton de retour en arrière dans la modale
+const uploadPhotoButton = document.getElementById("upload_photo_button"); //chargement de la photo depuis le navigateur dans le formulaire
+const submitFormButton = document.getElementById("submit_form"); //bouton de soumission de formulaire d'ajout de photo
+const closeButton = document.getElementById("closing"); //bouton de fermeture de la modale
 
-
+//ouvre la modale
 showButton.addEventListener("click", () => {
     dialog.showModal();
     showModaleGallery();
 });
+//passe à l'affichage de la modale editable
+addButton.addEventListener("click", () => {
+    clearModale();
+    addPost();
+});
+//reviens à l'écran initial de la modale
+previouslyButton.addEventListener("click", () => {
+    clearModale();
+    showModaleGallery();
+})
+//charge la nouvelle photo dans le formulaire
+uploadPhotoButton.addEventListener("click", () => {
+    uploadPhoto();
+})
+//soumet le formulaire au serveur
+submitFormButton.addEventListener("submit", (e) => {
+    e.preventDefault();
 
+    const formData = new FormData(form);
+    const request = new XMLHttpRequest();
+
+    request.open("POST", "http://localhost:5678/api/works", true);
+    request.append("image", );
+    request.append("title", );
+    request.append("category", )    
+    request.onload = () => {
+            request.status === 200
+                ? console.log("Fichier téléversé !")
+                : console.log(`Erreur ${request.status} lors de la tentative de téléversement du fichier.`);
+    };
+
+
+    request.send(formData);
+},
+    false,
+);
+
+//ferme la modale
 closeButton.addEventListener("click", () => {
+    clearModale();
     dialog.close();
 });
+
 
 //fonction pour afficher les images dans la modale
 async function showModaleGallery() {
@@ -162,29 +202,59 @@ async function showModaleGallery() {
     for (let i = 0; i < works.length; i++) {
         let article = works[i];
 
-        //création des balises
         let newFigure = document.createElement("figure")
         let imageWork = document.createElement("img");
-        let nameWork = document.createElement("figcaption");
-
-        //attribution des caractéristiques de chaque article
-        imageWork.src = article.imageUrl;
-        nameWork.innerText = article.title;
-
-        //rattachement des balises entre elles
-        newFigure.appendChild(imageWork);
-        newFigure.appendChild(nameWork);
-
-        //rattachement des balises au DOM
         let divModaleGallery = document.querySelector(".modale_gallery");
-        divModaleGallery.appendChild(newFigure);
-    }}
 
+        imageWork.src = article.imageUrl;
+        newFigure.appendChild(imageWork);
+        divModaleGallery.appendChild(newFigure);
+
+        // note : faut rajouter bouton corbeille
+    }
+}
+
+async function addPost() {
+    // recherche des catégories pour les options du formulaire
+    const catergoriesResponse = await fetch('http://localhost:5678/api/categories');
+    let categories = await catergoriesResponse.json();
+    let category_list = document.getElementById("add_category");
+    let previouslyButton = document.getElementById("previously");
+    let addForm = document.getElementById("add_form");
+
+    previouslyButton.style.visibility = "visible";
+    addForm.style.display = "flex";
+    //ajout des catégories dans le formulaire
+
+    for (let i = 0; i < categories.length; i++) {
+
+        let categorie = categories[i];
+        console.log(categorie.name)
+
+        let category = document.createElement("option");
+
+        category.innerText = categorie.name;
+        category.value = categorie.name;
+
+        category_list.appendChild(category);
+    }
+}
+function uploadPhoto() {
+    console.log()
+}
+
+//fonction pour effacer le contenu de la modale lors des interactions avec les boutons
+function clearModale() {
+    let divModaleGallery = document.querySelector(".modale_gallery");
+    let divFormGallery = document.getElementById("add_form");
+    let divCategory = document.getElementById("add_category");
+    divModaleGallery.innerHTML = "";
+    divCategory.innerHTML = "";
+    divFormGallery.style.display = "none";
+    previouslyButton.style.visibility = "hidden";
+}
 
 /* fin modale */
-
-//ca fonctionne pas la déconnexion en l'état...
-
 
 function disconnect() {
     let disconnectButton = document.querySelector(".logout");
@@ -193,6 +263,4 @@ function disconnect() {
         console.log("done")
         location.reload()
     })
-    }
-
-disconnect();
+}
