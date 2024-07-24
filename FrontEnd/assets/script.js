@@ -109,8 +109,8 @@ function createWorks(works) {
     for (let i = 0; i < works.length; i++) {
         let article = works[i];
         //verification des informations de chaque article pour les futurs filtres :
-        //console.log("id and name : " + article.category.id + ' ' + article.category.name);
-
+        console.log("id and name : " + article.id + ' ' + article.title);
+        console.log("id user : " + article.userId)
         //création des balises
         let newFigure = document.createElement("figure")
         let imageWork = document.createElement("img");
@@ -141,9 +141,9 @@ const dialog = document.querySelector("dialog"); //fenetre modale
 const showButton = document.querySelector("dialog + button"); //bouton d'ouverture de la modale
 const addButton = document.getElementById("add_photo_window"); //bouton pour changer la fenêtre de la modale
 const previouslyButton = document.getElementById("previously"); //bouton de retour en arrière dans la modale
-const uploadPhotoButton = document.getElementById("upload_photo_button"); //chargement de la photo depuis le navigateur dans le formulaire
-const submitFormButton = document.getElementById("submit_form"); //bouton de soumission de formulaire d'ajout de photo
+const formulaireAddPhoto = document.getElementById("add_form"); //formulaire d'ajout de la modale
 const closeButton = document.getElementById("closing"); //bouton de fermeture de la modale
+
 
 //ouvre la modale
 showButton.addEventListener("click", () => {
@@ -155,44 +155,85 @@ addButton.addEventListener("click", () => {
     clearModale();
     addPost();
 });
+
 //reviens à l'écran initial de la modale
 previouslyButton.addEventListener("click", () => {
     clearModale();
     showModaleGallery();
 })
-//charge la nouvelle photo dans le formulaire
-uploadPhotoButton.addEventListener("click", () => {
-    uploadPhoto();
-})
+
+//affiche l'image
+function previewImage() {
+    const fileInput = document.getElementById('fileInput');
+    const file = fileInput.files[0];
+    const imagePreviewContainer = document.getElementById('previewImageContainer');
+    
+    if(file.type.match('image.*')){
+      const reader = new FileReader();
+      
+      reader.addEventListener('load', function (event) {
+        const imageUrl = event.target.result;
+        const image = new Image();
+        
+        image.addEventListener('load', function() {
+          imagePreviewContainer.innerHTML = ''; // Vider le conteneur au cas où il y aurait déjà des images.
+          imagePreviewContainer.appendChild(image);
+        });
+        
+        image.src = imageUrl;
+        image.id = "new_photo";
+        image.style.width = '200px';
+        image.style.height = 'auto'
+      });
+      
+      reader.readAsDataURL(file);
+    }
+  }
+/*
+//enregistre le choix de catégorie
+function chooseCategory() {
+    const addCategory = document.getElementById("add_category");
+    addCategory.addEventListener('change', () => {
+        addCategory.value
+    })
+}*/
 //soumet le formulaire au serveur
-submitFormButton.addEventListener("submit", (e) => {
+formulaireAddPhoto.addEventListener("submit", async (e) => {
     e.preventDefault();
 
-    const formData = new FormData(form);
-    const request = new XMLHttpRequest();
+    //récupération du token pour l'header
+    const token = sessionStorage.getItem("token");
 
-    request.open("POST", "http://localhost:5678/api/works", true);
-    request.append("image", );
-    request.append("title", );
-    request.append("category", )    
-    request.onload = () => {
-            request.status === 200
-                ? console.log("Fichier téléversé !")
-                : console.log(`Erreur ${request.status} lors de la tentative de téléversement du fichier.`);
-    };
+    //récupération des informations du formulaire
+    const photo = (document.getElementById("new_photo")).src;
+    console.log(photo);
+    const title = document.getElementById("add_title").value;
+    console.log(title);
+    const category = document.getElementById("add_category").value;
+    console.log(category)
 
 
-    request.send(formData);
-},
-    false,
-);
+    const newFormObject = {
+        //id: ,
+        "imageUrl": photo,
+        "title": title,
+        "categoryId": category,
+        //userId: 1
+    }
+    const chargeUtile = JSON.stringify(newFormObject);
 
-//ferme la modale
-closeButton.addEventListener("click", () => {
-    clearModale();
-    dialog.close();
-});
+    let response = await fetch('http://localhost:5678/api/works', {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "authorization": `Bearer ${token}`,
+        },
+        body: chargeUtile
 
+    });
+    let result = await response.json();
+    alert(result.message)
+})
 
 //fonction pour afficher les images dans la modale
 async function showModaleGallery() {
@@ -214,6 +255,7 @@ async function showModaleGallery() {
     }
 }
 
+//affichage de la partie ajout d'image
 async function addPost() {
     // recherche des catégories pour les options du formulaire
     const catergoriesResponse = await fetch('http://localhost:5678/api/categories');
@@ -239,9 +281,6 @@ async function addPost() {
         category_list.appendChild(category);
     }
 }
-function uploadPhoto() {
-    console.log()
-}
 
 //fonction pour effacer le contenu de la modale lors des interactions avec les boutons
 function clearModale() {
@@ -254,6 +293,12 @@ function clearModale() {
     previouslyButton.style.visibility = "hidden";
 }
 
+//ferme la modale
+closeButton.addEventListener("click", () => {
+    clearModale();
+    dialog.close();
+});
+
 /* fin modale */
 
 function disconnect() {
@@ -264,3 +309,4 @@ function disconnect() {
         location.reload()
     })
 }
+previewImage()
