@@ -164,77 +164,84 @@ previouslyButton.addEventListener("click", () => {
 
 //affiche l'image
 function previewImage() {
-    const fileInput = document.getElementById('fileInput');
+    const fileInput = document.getElementById('file_input');
     const file = fileInput.files[0];
     const imagePreviewContainer = document.getElementById('previewImageContainer');
-    
-    if(file.type.match('image.*')){
-      const reader = new FileReader();
-      
-      reader.addEventListener('load', function (event) {
-        const imageUrl = event.target.result;
-        const image = new Image();
-        
-        image.addEventListener('load', function() {
-          imagePreviewContainer.innerHTML = ''; // Vider le conteneur au cas où il y aurait déjà des images.
-          imagePreviewContainer.appendChild(image);
+
+    if (file.type.match('image.*')) {
+        const reader = new FileReader();
+
+        reader.addEventListener('load', function (event) {
+            const imageUrl = event.target.result;
+            const image = new Image();
+
+            image.addEventListener('load', function () {
+                imagePreviewContainer.innerHTML = ''; // Vider le conteneur au cas où il y aurait déjà des images.
+                imagePreviewContainer.appendChild(image);
+            });
+
+            image.src = imageUrl;
+            image.id = "new_photo";
+            image.style.width = '200px';
+            image.style.height = 'auto'
         });
-        
-        image.src = imageUrl;
-        image.id = "new_photo";
-        image.style.width = '200px';
-        image.style.height = 'auto'
-      });
-      
-      reader.readAsDataURL(file);
+
+        reader.readAsDataURL(file);
     }
-  }
-/*
-//enregistre le choix de catégorie
-function chooseCategory() {
-    const addCategory = document.getElementById("add_category");
-    addCategory.addEventListener('change', () => {
-        addCategory.value
-    })
-}*/
+}
+
 //soumet le formulaire au serveur
-formulaireAddPhoto.addEventListener("submit", async (e) => {
+formulaireAddPhoto.addEventListener("submit", (e) => {
     e.preventDefault();
 
     //récupération du token pour l'header
     const token = sessionStorage.getItem("token");
 
     //récupération des informations du formulaire
-    const photo = (document.getElementById("new_photo")).src;
-    console.log(photo);
+    const image = document.getElementById("file_input").files[0];
     const title = document.getElementById("add_title").value;
+    const categoryName = document.getElementById("add_category").value;
+    const categoryId = determineId(categoryName);
+    const category = {
+        "id": categoryId,
+        "name": categoryName
+    };
+    /*
     console.log(title);
-    const category = document.getElementById("add_category").value;
-    console.log(category)
+    console.log(category);
+    console.log(image);
+*/
+    //création du formulaire à envoyer
+    const formData = new FormData();
+    formData.append("image", image);
+    formData.append("title", title);
+    formData.append("category", category);
 
-
-    const newFormObject = {
-        //id: ,
-        "imageUrl": photo,
-        "title": title,
-        "categoryId": category,
-        //userId: 1
-    }
-    const chargeUtile = JSON.stringify(newFormObject);
-
-    let response = await fetch('http://localhost:5678/api/works', {
+    //requête
+    fetch('http://localhost:5678/api/works', {
         method: "POST",
         headers: {
-            "Content-Type": "application/json",
-            "authorization": `Bearer ${token}`,
+            'authorization': `Bearer ${token}`,
         },
-        body: chargeUtile
-
+        body: JSON.stringify({
+            image: formData.image,
+            title: formData.title,
+            category: formData.category
+        }),
     });
-    let result = await response.json();
-    alert(result.message)
 })
 
+function determineId(categoryName) {
+    if(categoryName === "Objets") {
+        return 1;
+    } else if(categoryName === "Appartements") {
+        return 2;
+    } else if(categoryName === "Hotels & restaurant") {
+        return 3;
+    } else {
+        alert("Il y a un problème avec la catégorie sélectionnée")
+    };
+} 
 //fonction pour afficher les images dans la modale
 async function showModaleGallery() {
     const worksResponse = await fetch('http://localhost:5678/api/works');
