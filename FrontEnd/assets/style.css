@@ -29,6 +29,12 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
 	display: block;
 }
+
+li a {
+	text-decoration: none;
+	color: black;
+}
+
 body {
 	line-height: 1;
 }
@@ -53,6 +59,19 @@ body {
 	margin:auto;
 	font-family: 'Work Sans' ;
 	font-size: 14px;
+}
+
+#edition_mode {
+	background-color: black;
+	padding: 5px;
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+}
+
+#edition_mode p {
+	background-color: black;
+	color: white;
 }
 header {
 	display: flex;
@@ -127,6 +146,12 @@ li:hover {
 #introduction p {
 	margin-bottom: 0.5em;
 }
+
+.portfolio_nav {
+	display: flex;
+	justify-content: center;
+}
+
 #portfolio h2 {
 	text-align: center;
 	margin-bottom: 1em;
@@ -145,6 +170,7 @@ li:hover {
 }
 
 .filterButton {
+	background-color: #FFFEF8;
 	color: #1D6154;
 	border: solid 1px #1D6154;
 	border-radius: 60px;
@@ -219,6 +245,56 @@ footer nav ul {
 	justify-content: flex-end;
 	margin: 2em
 }
+
+/* Modale script */
+dialog {
+	flex-direction: column;
+	width: 50%;
+}
+.modale_nav {
+	display: flex;
+	justify-content: space-between;
+}
+.modale_gallery {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 10px;
+}
+
+.modale_gallery figure {
+	width: 100px;
+}
+
+.modale_gallery img {
+	width: 100%;
+}
+
+#previously {
+	visibility: hidden;
+}
+
+#add_form {
+	display: none;
+	flex-direction: column;
+	gap: 10px;
+	padding: 20px;
+}
+
+.add_photo {
+	background-color: #E8F1F6;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	padding: 20px 0;
+	width: 100%;
+}
+
+.add_photo p {
+	background-color: #E8F1F6;
+}
+
 
 /* Login page */
 
