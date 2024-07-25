@@ -138,18 +138,19 @@ function createWorks(works) {
 */
 
 const dialog = document.querySelector("dialog"); //fenetre modale
-const showButton = document.querySelector("dialog + button"); //bouton d'ouverture de la modale
+const showButton = document.querySelector(".edit_modale"); //bouton d'ouverture de la modale
 const addButton = document.getElementById("add_photo_window"); //bouton pour changer la fenêtre de la modale
 const previouslyButton = document.getElementById("previously"); //bouton de retour en arrière dans la modale
+//const trashButton = document.getElementsByClassName(".fa-trash-can"); //boutons pour supprimer les images de la gallerie
 const formulaireAddPhoto = document.getElementById("add_form"); //formulaire d'ajout de la modale
 const closeButton = document.getElementById("closing"); //bouton de fermeture de la modale
-
 
 //ouvre la modale
 showButton.addEventListener("click", () => {
     dialog.showModal();
     showModaleGallery();
 });
+
 //passe à l'affichage de la modale editable
 addButton.addEventListener("click", () => {
     clearModale();
@@ -166,6 +167,7 @@ previouslyButton.addEventListener("click", () => {
 function previewImage() {
     const fileInput = document.getElementById('file_input');
     const file = fileInput.files[0];
+    if (file === undefined) {return};
     const imagePreviewContainer = document.getElementById('previewImageContainer');
 
     if (file.type.match('image.*')) {
@@ -223,11 +225,7 @@ formulaireAddPhoto.addEventListener("submit", (e) => {
         headers: {
             'authorization': `Bearer ${token}`,
         },
-        body: JSON.stringify({
-            image: formData.image,
-            title: formData.title,
-            category: formData.category
-        }),
+        body: formData,
     });
 })
 
@@ -242,7 +240,8 @@ function determineId(categoryName) {
         alert("Il y a un problème avec la catégorie sélectionnée")
     };
 } 
-//fonction pour afficher les images dans la modale
+
+//fonction pour afficher les images dans la modale et crée les boutons poubelle
 async function showModaleGallery() {
     const worksResponse = await fetch('http://localhost:5678/api/works');
     let works = await worksResponse.json();
@@ -250,15 +249,19 @@ async function showModaleGallery() {
     for (let i = 0; i < works.length; i++) {
         let article = works[i];
 
-        let newFigure = document.createElement("figure")
+        let newFigure = document.createElement("figure");
         let imageWork = document.createElement("img");
+        let trashCan = document.createElement("i");
         let divModaleGallery = document.querySelector(".modale_gallery");
 
-        imageWork.src = article.imageUrl;
-        newFigure.appendChild(imageWork);
-        divModaleGallery.appendChild(newFigure);
+        trashCan.className = "fa-solid fa-trash-can";
+        trashCan.id = i;//id du bouton associé à l'id de l'élément
 
-        // note : faut rajouter bouton corbeille
+        imageWork.src = article.imageUrl;
+
+        newFigure.appendChild(imageWork);
+        newFigure.appendChild(trashCan);
+        divModaleGallery.appendChild(newFigure);
     }
 }
 
@@ -289,6 +292,13 @@ async function addPost() {
     }
 }
 
+//ferme la modale
+closeButton.addEventListener("click", () => {
+    clearModale();
+    dialog.close();
+});
+
+
 //fonction pour effacer le contenu de la modale lors des interactions avec les boutons
 function clearModale() {
     let divModaleGallery = document.querySelector(".modale_gallery");
@@ -300,10 +310,20 @@ function clearModale() {
     previouslyButton.style.visibility = "hidden";
 }
 
-//ferme la modale
-closeButton.addEventListener("click", () => {
-    clearModale();
-    dialog.close();
+//supprime les éléments dans le serveur
+trashButton.addEventListener("click", () => {
+    console.log("click")
+    const idTrash = e.currentTarget.getAttribute("id")
+    console.log(idTrash)
+
+    const token = sessionStorage.getItem("token");
+    
+    fetch('http://localhost:5678/api/works/' + idTrash, {
+          method: "DELETE",
+          headers: {
+            'authorization': `Bearer ${token}`,
+          },
+        })
 });
 
 /* fin modale */
@@ -316,4 +336,3 @@ function disconnect() {
         location.reload()
     })
 }
-previewImage()
