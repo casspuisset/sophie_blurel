@@ -1,45 +1,44 @@
-
 //fonction de fetch des articles et d'affichage du portfolio
 async function initGallery() {
     //fetch des travaux dans le backend
     const worksResponse = await fetch('http://localhost:5678/api/works');
     let works = await worksResponse.json();
 
-    //initialisation du bouton de login de nav
+    //adaptation de la page à la présence du token
     loginLink();
-
-    //création des filtres
-    fetchFilter();
 
     //affichage des travaux
     createWorks(works);
-    if (sessionStorage.getItem("token")?.length !== 143) {
-        document.querySelector(".edit_modale").style.display = "none";
-        document.getElementById("edition_mode").style.display = "none";
-    } else {
-        document.querySelector(".edit_modale").style.display = "flex";
-        document.querySelector(".filters").style.display = "none";
-        document.getElementById("edition_mode").style.display = "flex";
 
-    }
 }
+
 //initialisation de la page index
 initGallery();
 
-//initialisation du lien vers la page de log
+//vérification du token et affichage de la page
 function loginLink() {
     const loginLink = document.getElementById("login_link");
+    const editModale = document.querySelector(".edit_modale");
+    const filters = document.querySelector(".filters");
+    const editionMode = document.getElementById("edition_mode");
 
     if (sessionStorage.getItem("token")) {
         console.log("token bien enregistré")
         loginLink.innerText = "logout";
         loginLink.className = "logout";
         loginLink.setAttribute("href", "#")
+        editModale.style.display = "flex";
+        filters.style.display = "none";
+        editionMode.style.display = "flex";
         disconnect();
     } else {
         loginLink.innerText = "login";
         loginLink.className = "login";
         loginLink.setAttribute("href", "login.html")
+        editModale.style.display = "none";
+        editModale.style.display = "none";
+        //création des filtres
+        fetchFilter();
     }
 }
 
@@ -110,7 +109,7 @@ function createWorks(works) {
         let article = works[i];
         //verification des informations de chaque article pour les futurs filtres :
         console.log("id and name : " + article.id + ' ' + article.title);
-        console.log("id user : " + article.userId)
+        console.log("id category : " + article.category.name + article.categoryId)
         //création des balises
         let newFigure = document.createElement("figure")
         let imageWork = document.createElement("img");
@@ -131,43 +130,59 @@ function createWorks(works) {
 }
 
 
-
-
 /**
  * Modale
 */
+function modale() {
+    //ouvre la modale
+    const dialog = document.querySelector("dialog"); //fenetre modale
+    const showButton = document.querySelector(".edit_modale"); //bouton d'ouverture de la modale    
+    showButton.addEventListener("click", () => {
+        dialog.showModal();
+        showModaleGallery();
+    })
 
-const dialog = document.querySelector("dialog"); //fenetre modale
-const showButton = document.querySelector(".edit_modale"); //bouton d'ouverture de la modale
-const addButton = document.getElementById("add_photo_window"); //bouton pour changer la fenêtre de la modale
-const previouslyButton = document.getElementById("previously"); //bouton de retour en arrière dans la modale
-//const trashButton = document.getElementsByClassName(".fa-trash-can"); //boutons pour supprimer les images de la gallerie
-const formulaireAddPhoto = document.getElementById("add_form"); //formulaire d'ajout de la modale
-const closeButton = document.getElementById("closing"); //bouton de fermeture de la modale
+    //passe à l'affichage de la modale editable
+    const addButton = document.getElementById("add_photo_window"); //bouton pour changer la fenêtre de la modale
+    addButton.addEventListener("click", () => {
+        clearModale();
+        addPost();
+    });
 
-//ouvre la modale
-showButton.addEventListener("click", () => {
-    dialog.showModal();
-    showModaleGallery();
-});
 
-//passe à l'affichage de la modale editable
-addButton.addEventListener("click", () => {
-    clearModale();
-    addPost();
-});
+    //ferme la modale
+    const closeButton = document.getElementById("closing"); //bouton de fermeture de la modale
+    closeButton.addEventListener("click", () => {
+        clearModale();
+        dialog.close();
+    });
+};
+modale();
+//fonction globale de la modale
+
+
 
 //reviens à l'écran initial de la modale
+
+const previouslyButton = document.getElementById("previously"); //bouton de retour en arrière dans la modale
 previouslyButton.addEventListener("click", () => {
     clearModale();
     showModaleGallery();
+})
+
+
+//soumet le formulaire au serveur
+const formulaireAddPhoto = document.getElementById("add_form"); //formulaire d'ajout de la modale
+formulaireAddPhoto.addEventListener("submit", (e) => {
+    e.preventDefault();
+    postNewImage();
 })
 
 //affiche l'image
 function previewImage() {
     const fileInput = document.getElementById('file_input');
     const file = fileInput.files[0];
-    if (file === undefined) {return};
+    if (file === undefined) { return };
     const imagePreviewContainer = document.getElementById('previewImageContainer');
 
     if (file.type.match('image.*')) {
@@ -192,54 +207,18 @@ function previewImage() {
     }
 }
 
-//soumet le formulaire au serveur
-formulaireAddPhoto.addEventListener("submit", (e) => {
-    e.preventDefault();
-
-    //récupération du token pour l'header
-    const token = sessionStorage.getItem("token");
-
-    //récupération des informations du formulaire
-    const image = document.getElementById("file_input").files[0];
-    const title = document.getElementById("add_title").value;
-    const categoryName = document.getElementById("add_category").value;
-    const categoryId = determineId(categoryName);
-    const category = {
-        "id": categoryId,
-        "name": categoryName
-    };
-    /*
-    console.log(title);
-    console.log(category);
-    console.log(image);
-*/
-    //création du formulaire à envoyer
-    const formData = new FormData();
-    formData.append("image", image);
-    formData.append("title", title);
-    formData.append("category", category);
-
-    //requête
-    fetch('http://localhost:5678/api/works', {
-        method: "POST",
-        headers: {
-            'authorization': `Bearer ${token}`,
-        },
-        body: formData,
-    });
-})
-
+//determine l'id de catégorie à envoyer via la requête POST
 function determineId(categoryName) {
-    if(categoryName === "Objets") {
+    if (categoryName === "Objets") {
         return 1;
-    } else if(categoryName === "Appartements") {
+    } else if (categoryName === "Appartements") {
         return 2;
-    } else if(categoryName === "Hotels & restaurant") {
+    } else if (categoryName === "Hotels & restaurant") {
         return 3;
     } else {
         alert("Il y a un problème avec la catégorie sélectionnée")
     };
-} 
+}
 
 //fonction pour afficher les images dans la modale et crée les boutons poubelle
 async function showModaleGallery() {
@@ -263,6 +242,7 @@ async function showModaleGallery() {
         newFigure.appendChild(trashCan);
         divModaleGallery.appendChild(newFigure);
     }
+    deletePost()
 }
 
 //affichage de la partie ajout d'image
@@ -277,7 +257,7 @@ async function addPost() {
     previouslyButton.style.visibility = "visible";
     addForm.style.display = "flex";
     //ajout des catégories dans le formulaire
-
+/*
     for (let i = 0; i < categories.length; i++) {
 
         let categorie = categories[i];
@@ -289,15 +269,8 @@ async function addPost() {
         category.value = categorie.name;
 
         category_list.appendChild(category);
-    }
+    }*/
 }
-
-//ferme la modale
-closeButton.addEventListener("click", () => {
-    clearModale();
-    dialog.close();
-});
-
 
 //fonction pour effacer le contenu de la modale lors des interactions avec les boutons
 function clearModale() {
@@ -305,26 +278,55 @@ function clearModale() {
     let divFormGallery = document.getElementById("add_form");
     let divCategory = document.getElementById("add_category");
     divModaleGallery.innerHTML = "";
-    divCategory.innerHTML = "";
+    //divCategory.style.display = "none";
     divFormGallery.style.display = "none";
     previouslyButton.style.visibility = "hidden";
 }
 
-//supprime les éléments dans le serveur
-trashButton.addEventListener("click", () => {
-    console.log("click")
-    const idTrash = e.currentTarget.getAttribute("id")
-    console.log(idTrash)
-
+//fonction de fetch POST
+async function postNewImage() {
+    //récupération du token pour l'header
     const token = sessionStorage.getItem("token");
-    
-    fetch('http://localhost:5678/api/works/' + idTrash, {
-          method: "DELETE",
-          headers: {
+    //récupération des informations du formulaire
+    const image = document.getElementById("file_input").files[0];
+    const title = document.getElementById("add_title").value;
+    const categoryName = document.getElementById("add_category").value;
+
+    //création du formulaire à envoyer
+    const formData = new FormData();
+    formData.append("image", image);
+    formData.append("title", title);
+    formData.append("category", determineId(categoryName));
+
+    //requête
+    fetch('http://localhost:5678/api/works', {
+        method: "POST",
+        headers: {
             'authorization': `Bearer ${token}`,
-          },
-        })
-});
+        },
+        body: formData,
+    });
+}
+
+//supprime les éléments dans le serveur
+async function deletePost() {
+    const trashButton = document.getElementsByClassName(".fa-trash-can"); //boutons pour supprimer les images de la gallerie
+
+    trashButton.addEventListener("click", async (e) => {
+        console.log("ça marche")
+        /*console.log(idTrash)
+
+        const token = sessionStorage.getItem("token");
+
+        await fetch('http://localhost:5678/api/works/' + idTrash, {
+            method: "DELETE",
+            headers: {
+                'authorization': `Bearer ${token}`,
+            },
+        })*/
+    });
+}
+
 
 /* fin modale */
 
