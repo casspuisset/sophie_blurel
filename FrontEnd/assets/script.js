@@ -83,7 +83,6 @@ async function galleryFilter() {
     clickFilterEvent.addEventListener("click", async (t) => {
         //console.log(t);
         let currentlyActive = t.target.innerText;
-        console.log(currentlyActive);
 
         const worksResponse = await fetch('http://localhost:5678/api/works');
         let works = await worksResponse.json();
@@ -107,9 +106,6 @@ async function galleryFilter() {
 function createWorks(works) {
     for (let i = 0; i < works.length; i++) {
         let article = works[i];
-        //verification des informations de chaque article pour les futurs filtres :
-        console.log("id and name : " + article.id + ' ' + article.title);
-        console.log("id category : " + article.category.name + article.categoryId)
         //création des balises
         let newFigure = document.createElement("figure")
         let imageWork = document.createElement("img");
@@ -133,12 +129,13 @@ function createWorks(works) {
 /**
  * Modale
 */
-function modale() {
+async function modale() {
     //ouvre la modale
     const dialog = document.querySelector("dialog"); //fenetre modale
     const showButton = document.querySelector(".edit_modale"); //bouton d'ouverture de la modale    
     showButton.addEventListener("click", () => {
         dialog.showModal();
+        clearModale();
         showModaleGallery();
     })
 
@@ -149,6 +146,20 @@ function modale() {
         addPost();
     });
 
+    //soumet le formulaire au serveur
+    const formulaireAddPhoto = document.getElementById("add_form"); //formulaire d'ajout de la modale
+    formulaireAddPhoto.addEventListener("submit", (e) => {
+        e.preventDefault();
+        clearModale();
+        postNewImage();
+    });
+
+    //fonction de retour à la galerie de la modale
+    const previouslyButton = document.getElementById("previously"); //bouton de retour en arrière dans la modale
+    previouslyButton.addEventListener("click", () => {
+        clearModale();
+        showModaleGallery();
+    })
 
     //ferme la modale
     const closeButton = document.getElementById("closing"); //bouton de fermeture de la modale
@@ -162,21 +173,6 @@ modale();
 
 
 
-//reviens à l'écran initial de la modale
-
-const previouslyButton = document.getElementById("previously"); //bouton de retour en arrière dans la modale
-previouslyButton.addEventListener("click", () => {
-    clearModale();
-    showModaleGallery();
-})
-
-
-//soumet le formulaire au serveur
-const formulaireAddPhoto = document.getElementById("add_form"); //formulaire d'ajout de la modale
-formulaireAddPhoto.addEventListener("submit", (e) => {
-    e.preventDefault();
-    postNewImage();
-})
 
 //affiche l'image
 function previewImage() {
@@ -227,7 +223,7 @@ async function showModaleGallery() {
 
     for (let i = 0; i < works.length; i++) {
         let article = works[i];
-
+        console.log(i + "traité");
         let newFigure = document.createElement("figure");
         let imageWork = document.createElement("img");
         let trashCan = document.createElement("i");
@@ -241,47 +237,40 @@ async function showModaleGallery() {
         newFigure.appendChild(imageWork);
         newFigure.appendChild(trashCan);
         divModaleGallery.appendChild(newFigure);
+        trashCan.addEventListener("click", async (e) => {
+            deletePost(i)
+        });
     }
-    deletePost()
 }
 
 //affichage de la partie ajout d'image
 async function addPost() {
-    // recherche des catégories pour les options du formulaire
-    const catergoriesResponse = await fetch('http://localhost:5678/api/categories');
-    let categories = await catergoriesResponse.json();
-    let category_list = document.getElementById("add_category");
+
     let previouslyButton = document.getElementById("previously");
     let addForm = document.getElementById("add_form");
 
     previouslyButton.style.visibility = "visible";
     addForm.style.display = "flex";
-    //ajout des catégories dans le formulaire
-/*
-    for (let i = 0; i < categories.length; i++) {
-
-        let categorie = categories[i];
-        console.log(categorie.name)
-
-        let category = document.createElement("option");
-
-        category.innerText = categorie.name;
-        category.value = categorie.name;
-
-        category_list.appendChild(category);
-    }*/
 }
 
 //fonction pour effacer le contenu de la modale lors des interactions avec les boutons
 function clearModale() {
     let divModaleGallery = document.querySelector(".modale_gallery");
     let divFormGallery = document.getElementById("add_form");
-    let divCategory = document.getElementById("add_category");
+    //let divCategory = document.getElementById("add_category");
     divModaleGallery.innerHTML = "";
     //divCategory.style.display = "none";
     divFormGallery.style.display = "none";
     previouslyButton.style.visibility = "hidden";
 }
+
+
+//reviens à l'écran initial de la modale
+const previouslyButton = document.getElementById("previously"); //bouton de retour en arrière dans la modale
+previouslyButton.addEventListener("click", () => {
+    clearModale();
+    showModaleGallery();
+})
 
 //fonction de fetch POST
 async function postNewImage() {
@@ -309,22 +298,19 @@ async function postNewImage() {
 }
 
 //supprime les éléments dans le serveur
-async function deletePost() {
-    const trashButton = document.getElementsByClassName(".fa-trash-can"); //boutons pour supprimer les images de la gallerie
+async function deletePost(i) {
+    const token = sessionStorage.getItem("token");
 
-    trashButton.addEventListener("click", async (e) => {
-        console.log("ça marche")
-        /*console.log(idTrash)
-
-        const token = sessionStorage.getItem("token");
-
-        await fetch('http://localhost:5678/api/works/' + idTrash, {
-            method: "DELETE",
-            headers: {
-                'authorization': `Bearer ${token}`,
-            },
-        })*/
-    });
+    await fetch('http://localhost:5678/api/works/'+i, {
+        method: "DELETE",
+        headers: {
+            'authorization': `Bearer ${token}`,
+        },
+    }).then((response) => {
+        if(response.ok) {
+            alert("Delete function worked")
+        }
+    })
 }
 
 
@@ -334,7 +320,7 @@ function disconnect() {
     let disconnectButton = document.querySelector(".logout");
     disconnectButton.addEventListener("click", () => {
         sessionStorage.removeItem("token");
-        console.log("done")
+        console.log("disconnected")
         location.reload()
     })
 }
